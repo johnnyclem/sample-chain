@@ -1,0 +1,42 @@
+name: Smart Contracts CI
+
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['contracts/**']
+  pull_request:
+    branches: [main]
+    paths: ['contracts/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: contracts/package-lock.json
+
+      - name: Install dependencies
+        working-directory: contracts
+        run: npm ci
+
+      - name: Compile contracts
+        working-directory: contracts
+        run: npx hardhat compile
+
+      - name: Run tests
+        working-directory: contracts
+        run: npx hardhat test
+
+      - name: Check coverage
+        working-directory: contracts
+        run: npx hardhat coverage
+
+      - name: Verify contract sizes
+        working-directory: contracts
+        run: npx hardhat size-contracts

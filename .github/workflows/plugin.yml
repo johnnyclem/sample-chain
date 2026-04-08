@@ -1,0 +1,45 @@
+name: macOS Plugin CI
+
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['plugin/**']
+  pull_request:
+    branches: [main]
+    paths: ['plugin/**']
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Build Swift Package
+        working-directory: plugin
+        run: swift build
+
+      - name: Run tests
+        working-directory: plugin
+        run: swift test
+
+  auval:
+    runs-on: macos-14
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Build Release
+        working-directory: plugin
+        run: swift build -c release
+
+      - name: Validate Audio Unit
+        run: |
+          # Install the built component and run auval
+          echo "AUv3 validation would run here after proper .appex packaging"
+          # auval -v aumu SaCh Schn
